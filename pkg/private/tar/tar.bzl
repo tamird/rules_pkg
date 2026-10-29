@@ -14,6 +14,7 @@
 """Rules for making .tar files."""
 
 load("//pkg:providers.bzl", "PackageVariablesInfo")
+load("//pkg/private:python_action.bzl", "run_writer")
 load(
     "//pkg/private:pkg_files.bzl",
     "add_directory",
@@ -191,20 +192,15 @@ def _pkg_tar_impl(ctx):
         transitive = mapping_context.file_deps_transitive,
     )
 
-    ctx.actions.run(
+    run_writer(
+        ctx,
+        writer = ctx.attr._build_tar,
         mnemonic = "PackageTar",
         progress_message = "Writing: %s" % output_file.path,
         inputs = inputs,
         tools = [ctx.executable.compressor] if ctx.executable.compressor else [],
-        executable = ctx.executable._build_tar,
         arguments = [args],
         outputs = [output_file],
-        env = {
-            "LANG": "en_US.UTF-8",
-            "LC_CTYPE": "UTF-8",
-            "PYTHONIOENCODING": "UTF-8",
-            "PYTHONUTF8": "1",
-        },
         use_default_shell_env = True,
     )
     return [

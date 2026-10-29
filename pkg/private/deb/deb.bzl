@@ -14,6 +14,7 @@
 """Rule for creating Debian packages."""
 
 load("//pkg:providers.bzl", "PackageVariablesInfo")
+load("//pkg/private:python_action.bzl", "run_writer")
 load("//pkg/private:util.bzl", "setup_output_files", "substitute_package_variables")
 
 _tar_filetype = [".tar", ".tar.gz", ".tgz", ".tar.bz2", "tar.xz", "tar.zst"]
@@ -191,18 +192,13 @@ def _pkg_deb_impl(ctx):
 
     args.set_param_file_format("flag_per_line")
     args.use_param_file("@%s", use_always = True)
-    ctx.actions.run(
+    run_writer(
+        ctx,
+        writer = ctx.attr._make_deb,
         mnemonic = "MakeDeb",
-        executable = ctx.executable._make_deb,
         arguments = [args],
         inputs = files,
         outputs = [output_file, changes_file],
-        env = {
-            "LANG": "en_US.UTF-8",
-            "LC_CTYPE": "UTF-8",
-            "PYTHONIOENCODING": "UTF-8",
-            "PYTHONUTF8": "1",
-        },
     )
     output_groups = {
         "out": [ctx.outputs.out],

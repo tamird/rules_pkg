@@ -23,6 +23,7 @@ load(
     "create_mapping_context_from_ctx",
     "write_manifest",
 )
+load("//pkg/private:python_action.bzl", "run_writer")
 load(
     "//pkg/private:util.bzl",
     "get_stamp_detect",
@@ -67,18 +68,13 @@ def _pkg_zip_impl(ctx):
         transitive = mapping_context.file_deps_transitive,
     )
 
-    ctx.actions.run(
+    run_writer(
+        ctx,
+        writer = ctx.attr._build_zip,
         mnemonic = "PackageZip",
         inputs = all_inputs,
-        executable = ctx.executable._build_zip,
         arguments = [args],
         outputs = [output_file],
-        env = {
-            "LANG": "en_US.UTF-8",
-            "LC_CTYPE": "UTF-8",
-            "PYTHONIOENCODING": "UTF-8",
-            "PYTHONUTF8": "1",
-        },
         use_default_shell_env = True,
     )
     return [

@@ -6,6 +6,10 @@ common: &common
 tasks:
   ubuntu2204:
     platform: ubuntu2204
+    # Exercise both writers without the host program used by the script bootstrap.
+    build_flags:
+    - "--@rules_python//python/config_settings:bootstrap_impl=script"
+    - "--sandbox_block_path=/usr/bin/env"
     <<: *common
   macos:
     platform: macos
